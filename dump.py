@@ -1,10 +1,11 @@
 import wx
 import sys
-import threading
+import thread_utils
 from flow import FlowManager
 from miner import *
 from translator import Translator
 from writer import *
+
 
 class RedirectText(object):
     def __init__(self, aWxTextCtrl):
@@ -14,9 +15,9 @@ class RedirectText(object):
         self.out.WriteText(string)
 
 
-class PhobosThread(threading.Thread):
+class PhobosThread(thread_utils.ThreadWithExc):
     def __init__(self, rvr, dump_path):
-        threading.Thread.__init__(self)
+        thread_utils.ThreadWithExc.__init__(self)
         self.rvr = rvr
         self.dump_path = dump_path
 
@@ -38,9 +39,12 @@ class PhobosThread(threading.Thread):
         writers = (
             JsonWriter(self.dump_path, indent=2),)
 
-        FlowManager(miners, writers).run("", "multi")
+        try:
+            FlowManager(miners, writers).run("", "multi")
+        except KeyboardInterrupt:
+            pass
+
         print "\n== Done! =="
-        sys.stdout = self.old_stdout
 
 
 class PhobosDump(wx.Frame):
@@ -60,9 +64,22 @@ class PhobosDump(wx.Frame):
         panel.SetSizer(sizer)
         self.Centre(wx.BOTH)
 
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+
         # redirect text here
         redir = RedirectText(log)
         self.old_stdout = sys.stdout
-        sys.stdout=redir
-        thread = PhobosThread(self.rvr, self.dump_path)
-        thread.start()
+        sys.stdout = redir
+
+        self.thread = PhobosThread(self.rvr, self.dump_path)
+        self.thread.daemon = True
+        self.thread.start()
+
+    def OnClose(self, event):
+        # We pass KeyboardInterrupt as Phobos is specifically designed to
+        # kill itself in this case. A regular Exception, or any subclass,
+        # will simply tell Phobos to log the particular iteration as failed
+        # and continue with the next iteration
+        self.thread.raiseExc(KeyboardInterrupt)
+        sys.stdout = self.old_stdout
+        self.Destroy()
