@@ -3,16 +3,11 @@ This is a simple GUI wrapper for Phobos, an EVE Online client data dumper used f
 
 This has only been tested on Windows, but will priobably work for Linux and OS X as well. It's also been tested only for TQ data, but whatever server works in Reverence should work here.
 
-### Dependencies
+### Dependencies for running from source
 
 * Python 2.7
 * [Reverence](https://github.com/ntt/reverence)
 * Phobos is shipped in the zipfile `Phobos.zip`
-
-### How to use
-Self-contained distributables are not compiled (yet). You must run this through a python interpreter with Reverence installed:
-
-    python start.py
 
 ### Screenshots
 
