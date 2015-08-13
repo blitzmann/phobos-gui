@@ -11,6 +11,6 @@ This has only been tested on Windows, but will priobably work for Linux and OS X
 
 ### Screenshots
 
-![capture](https://cloud.githubusercontent.com/assets/3904767/9237455/ed78719c-4118-11e5-84e4-bb60d2950535.PNG)
+![1](https://cloud.githubusercontent.com/assets/3904767/9255884/2857c1cc-41ba-11e5-9c2f-fb44091b2f96.PNG)
+![2](https://cloud.githubusercontent.com/assets/3904767/9255885/2972f5b8-41ba-11e5-839c-1325e5f531e2.PNG)
 
-![capture](https://cloud.githubusercontent.com/assets/3904767/9237438/d58e964c-4118-11e5-8ce6-6d981b577932.PNG)
