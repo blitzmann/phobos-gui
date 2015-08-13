@@ -3,7 +3,7 @@ import os.path
 import sys
 
 base_path = unicode(os.path.dirname(os.path.realpath(os.path.abspath(
-            sys.modules['__main__'].__file__))), sys.getfilesystemencoding())
+            sys.argv[0]))), sys.getfilesystemencoding())
 
 class SettingsProvider():
     BASE_PATH = base_path
