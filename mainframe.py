@@ -13,7 +13,7 @@ class MainFrame(wx.Frame):
         return cls.__instance if cls.__instance is not None else MainFrame()
 
     def __init__(self):
-        wx.Frame.__init__(self, None, wx.ID_ANY, "Phobos-GUI", size=wx.Size(550, 400))
+        wx.Frame.__init__(self, None, wx.ID_ANY, "Phobos-GUI", size=wx.Size(550, 500))
 
         MainFrame.__instance = self
         self.settings = settings.PathSettings.getInstance()
@@ -53,17 +53,41 @@ class MainFrame(wx.Frame):
         self.m_staticline2 = wx.StaticLine(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, wx.LI_HORIZONTAL)
         main_sizer.Add(self.m_staticline2, 0, wx.EXPAND | wx.ALL, 5)
 
+        dump_lang_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        left_sizer = wx.BoxSizer(wx.VERTICAL)
+
         self.st_dump = wx.StaticText(self, wx.ID_ANY, u"Phobos Dump Directory", wx.DefaultPosition, wx.DefaultSize, 0)
         self.st_dump.Wrap(-1)
-        main_sizer.Add(self.st_dump, 0, wx.ALL, 5)
+        left_sizer.Add(self.st_dump, 0, wx.ALL, 5)
 
-        self.dump_picker = wx.DirPickerCtrl(self, wx.ID_ANY, self.settings.get('dump_path') or wx.EmptyString, u"Select Phobos Dump Directory", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE)
-        main_sizer.Add(self.dump_picker, 0, wx.ALL | wx.EXPAND, 5)
+        self.dump_picker = wx.DirPickerCtrl(self, wx.ID_ANY, self.settings.get('dump_path') or wx.EmptyString, u"Select Phobos Dump Directory", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE|wx.DIRP_DIR_MUST_EXIST)
+        left_sizer.Add(self.dump_picker, 0, wx.ALL|wx.EXPAND, 5)
+
+
+        dump_lang_sizer.Add(left_sizer, 1, wx.EXPAND, 5)
+
+        right_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.st_lang = wx.StaticText(self, wx.ID_ANY, u"Language", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.st_lang.Wrap(-1)
+        right_sizer.Add(self.st_lang, 0, wx.ALL, 5)
 
         choice_langChoices = [u"multi", u"en-us", u"es", u"de", u"fr", u"it", u"ja", u"ru", u"zh"]
         self.choice_lang = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, choice_langChoices, 0)
         self.choice_lang.SetSelection(self.settings.get("lang") or 0)
-        main_sizer.Add(self.choice_lang, 0, wx.ALL, 5)
+        right_sizer.Add(self.choice_lang, 0, wx.ALL, 5)
+
+        dump_lang_sizer.Add(right_sizer, 0, wx.EXPAND, 5)
+
+        main_sizer.Add(dump_lang_sizer, 0, wx.EXPAND, 5)
+
+        self.st_filter = wx.StaticText(self, wx.ID_ANY, u"Comma-separated Filter List", wx.DefaultPosition, wx.DefaultSize, 0)
+        self.st_filter.Wrap(-1)
+        main_sizer.Add(self.st_filter, 0, wx.ALL, 5)
+
+        self.txt_filter = wx.TextCtrl(self, wx.ID_ANY, self.settings.get('filter') or wx.EmptyString, wx.DefaultPosition, wx.Size(-1, 55), wx.TE_MULTILINE)
+        main_sizer.Add(self.txt_filter, 0, wx.ALL | wx.EXPAND, 5)
 
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button(self, wx.ID_OK, "Start Dump")
@@ -138,11 +162,14 @@ class MainFrame(wx.Frame):
         self.set_eve_paths()
 
     def set_choice(self, event):
+        print "set choice",event.Selection
         self.settings.set("lang", event.Selection)
 
     def process_dump(self, event):
         lang = self.choice_lang.GetString(self.choice_lang.Selection)
-        PhobosDump(self, self.rvr, self.settings.get('dump_path'), lang).Show()
+        filter = self.txt_filter.GetValue()
+        self.settings.set('filter', filter)
+        PhobosDump(self, (self.rvr, self.settings.get('dump_path'), lang, filter)).Show()
 
     def OnClose(self, event):
         settings.SettingsProvider.getInstance().saveAll()

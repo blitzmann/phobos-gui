@@ -16,11 +16,9 @@ class RedirectText(object):
 
 
 class PhobosThread(thread_utils.ThreadWithExc):
-    def __init__(self, rvr, dump_path, lang):
+    def __init__(self, phobos_data):
         thread_utils.ThreadWithExc.__init__(self)
-        self.rvr = rvr
-        self.dump_path = dump_path
-        self.lang = lang
+        self.rvr, self.dump_path, self.lang, self.filter = phobos_data
 
     def run(self):
         pickle_miner = ResourcePickleMiner(self.rvr)
@@ -41,7 +39,7 @@ class PhobosThread(thread_utils.ThreadWithExc):
             JsonWriter(self.dump_path, indent=2),)
 
         try:
-            FlowManager(miners, writers).run("", self.lang)
+            FlowManager(miners, writers).run(self.filter, self.lang)
         except KeyboardInterrupt:
             pass
 
@@ -49,7 +47,7 @@ class PhobosThread(thread_utils.ThreadWithExc):
 
 
 class PhobosDump(wx.Frame):
-    def __init__(self, parent, rvr, dump_path, lang):
+    def __init__(self, parent, phobos_data):
         wx.Frame.__init__(self, parent, wx.ID_ANY, "Dumping...", size=wx.Size(400, 400))
 
         # Add a panel so it looks the correct on all platforms
@@ -70,7 +68,7 @@ class PhobosDump(wx.Frame):
         self.old_stdout = sys.stdout
         sys.stdout = redir
 
-        self.thread = PhobosThread(rvr, dump_path, lang)
+        self.thread = PhobosThread(phobos_data)
         self.thread.daemon = True
         self.thread.start()
 
