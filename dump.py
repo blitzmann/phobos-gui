@@ -16,10 +16,11 @@ class RedirectText(object):
 
 
 class PhobosThread(thread_utils.ThreadWithExc):
-    def __init__(self, rvr, dump_path):
+    def __init__(self, rvr, dump_path, lang):
         thread_utils.ThreadWithExc.__init__(self)
         self.rvr = rvr
         self.dump_path = dump_path
+        self.lang = lang
 
     def run(self):
         pickle_miner = ResourcePickleMiner(self.rvr)
@@ -40,7 +41,7 @@ class PhobosThread(thread_utils.ThreadWithExc):
             JsonWriter(self.dump_path, indent=2),)
 
         try:
-            FlowManager(miners, writers).run("", "multi")
+            FlowManager(miners, writers).run("", self.lang)
         except KeyboardInterrupt:
             pass
 
@@ -48,10 +49,8 @@ class PhobosThread(thread_utils.ThreadWithExc):
 
 
 class PhobosDump(wx.Frame):
-    def __init__(self, parent, rvr, dump_path):
+    def __init__(self, parent, rvr, dump_path, lang):
         wx.Frame.__init__(self, parent, wx.ID_ANY, "Dumping...", size=wx.Size(400, 400))
-        self.rvr = rvr
-        self.dump_path = dump_path
 
         # Add a panel so it looks the correct on all platforms
         panel = wx.Panel(self, wx.ID_ANY)
@@ -71,7 +70,7 @@ class PhobosDump(wx.Frame):
         self.old_stdout = sys.stdout
         sys.stdout = redir
 
-        self.thread = PhobosThread(self.rvr, self.dump_path)
+        self.thread = PhobosThread(rvr, dump_path, lang)
         self.thread.daemon = True
         self.thread.start()
 
@@ -80,6 +79,7 @@ class PhobosDump(wx.Frame):
         # kill itself in this case. A regular Exception, or any subclass,
         # will simply tell Phobos to log the particular iteration as failed
         # and continue with the next iteration
-        self.thread.raiseExc(KeyboardInterrupt)
+        if self.thread.isAlive():
+            self.thread.raiseExc(KeyboardInterrupt)
         sys.stdout = self.old_stdout
         self.Destroy()

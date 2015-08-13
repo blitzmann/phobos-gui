@@ -60,6 +60,11 @@ class MainFrame(wx.Frame):
         self.dump_picker = wx.DirPickerCtrl(self, wx.ID_ANY, self.settings.get('dump_path') or wx.EmptyString, u"Select Phobos Dump Directory", wx.DefaultPosition, wx.DefaultSize, wx.DIRP_DEFAULT_STYLE)
         main_sizer.Add(self.dump_picker, 0, wx.ALL | wx.EXPAND, 5)
 
+        choice_langChoices = [u"multi", u"en-us", u"es", u"de", u"fr", u"it", u"ja", u"ru", u"zh"]
+        self.choice_lang = wx.Choice(self, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, choice_langChoices, 0)
+        self.choice_lang.SetSelection(self.settings.get("lang") or 0)
+        main_sizer.Add(self.choice_lang, 0, wx.ALL, 5)
+
         m_sdbSizer1 = wx.StdDialogButtonSizer()
         self.m_sdbSizer1OK = wx.Button(self, wx.ID_OK, "Start Dump")
         m_sdbSizer1.AddButton(self.m_sdbSizer1OK)
@@ -80,6 +85,7 @@ class MainFrame(wx.Frame):
         self.client_picker.Bind(wx.EVT_DIRPICKER_CHANGED, self.set_eve_paths)
         self.dump_picker.Bind(wx.EVT_DIRPICKER_CHANGED, self.set_dump_path)
         self.m_sdbSizer1OK.Bind(wx.EVT_BUTTON, self.process_dump)
+        self.choice_lang.Bind(wx.EVT_CHOICE, self.set_choice)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
 
     def check_btn(self):
@@ -131,8 +137,12 @@ class MainFrame(wx.Frame):
         """ When user changes server, reset paths """
         self.set_eve_paths()
 
+    def set_choice(self, event):
+        self.settings.set("lang", event.Selection)
+
     def process_dump(self, event):
-        PhobosDump(self, self.rvr, self.settings.get('dump_path')).Show()
+        lang = self.choice_lang.GetString(self.choice_lang.Selection)
+        PhobosDump(self, self.rvr, self.settings.get('dump_path'), lang).Show()
 
     def OnClose(self, event):
         settings.SettingsProvider.getInstance().saveAll()

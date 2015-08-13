@@ -107,7 +107,8 @@ class PathSettings():
 
         servicePathDefaultSettings = {
             "client_path": None,
-            "dump_path": None
+            "dump_path": None,
+            "lang": None
         }
 
         self.servicePathSettings = SettingsProvider.getInstance().getSettings("paths.settings", servicePathDefaultSettings)
