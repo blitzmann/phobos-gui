@@ -16,7 +16,7 @@ if sys.platform == "win32":
     base = "Win32GUI"
 
 setup(  name = "Phobos-GUI",
-        version = "0.1",
+        version = "0.2",
         description = "GUI frontend for Phobos",
         options = {"build_exe": build_exe_options},
         executables = [Executable("phb_gui.py", base=base)])
